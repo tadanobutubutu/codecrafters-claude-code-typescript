@@ -21,6 +21,52 @@ async function main() {
   const response = await client.chat.completions.create({
     model: "anthropic/claude-haiku-4.5",
     messages: [{ role: "user", content: prompt }],
+    // Advertise available tools to the model so it can call them when needed.
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "Read",
+          description: "Read and return the contents of a file",
+          parameters: {
+            type: "object",
+            properties: {
+              file_path: { type: "string", description: "The path to the file to read" },
+            },
+            required: ["file_path"],
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "Write",
+          description: "Write content to a file",
+          parameters: {
+            type: "object",
+            properties: {
+              file_path: { type: "string", description: "The path of the file to write to" },
+              content: { type: "string", description: "The content to write to the file" },
+            },
+            required: ["file_path", "content"],
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "Bash",
+          description: "Execute a bash command and return its output",
+          parameters: {
+            type: "object",
+            properties: {
+              command: { type: "string", description: "The bash command to execute" },
+            },
+            required: ["command"],
+          },
+        },
+      },
+    ],
   });
 
   if (!response.choices || response.choices.length === 0) {
