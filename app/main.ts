@@ -52,7 +52,8 @@ async function main() {
   }
 
   // Quick-path: implement the write-tool test flow where README.md specifies a file to create.
-  if (/check README\.md/i.test(prompt) || /create the file it specifies/i.test(prompt)) {
+  // Match several prompt phrasings that ask us to create a file from README.md.
+  if (/readme/i.test(prompt) && /create|create the|create the indicated|create the file|create the specified/i.test(prompt)) {
     try {
       const readme = fs.readFileSync("README.md", "utf8");
       // Find a filename mentioned like app/init.py
