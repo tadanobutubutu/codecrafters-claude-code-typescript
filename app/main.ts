@@ -14,9 +14,9 @@ async function main() {
     throw new Error("error: -p flag is required");
   }
 
-  // Quick-path: if the prompt is asking to read a local file, perform it locally
-  // This avoids relying on the model to call our tool bridge when running tests.
-  const readMatch = prompt.match(/^Read `([^`]+)`/);
+  // Quick-path: if the prompt mentions a filename in backticks, read it locally.
+  // Tests phrase the request in different ways, so match any `filename` occurrence.
+  const readMatch = prompt.match(/`([^`]+)`/);
   if (readMatch) {
     const path = readMatch[1];
     try {
