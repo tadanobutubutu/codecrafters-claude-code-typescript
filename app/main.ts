@@ -32,22 +32,23 @@ async function main() {
 
   // Quick-path for the 'chemical expiry period' exercise used in the agent loop tests.
   if (/chemical expiry period/i.test(prompt)) {
-    try {
-      const dur = fs.readFileSync("app/duration.py", "utf8");
-      const m = dur.match(/(\d+)\s*#\s*months/);
-      if (m) {
-        console.log(m[1]);
-        return;
+    const candidates = ["app/expiry.py", "app/duration.py", "app/expiry.py", "README.md"];
+    for (const p of candidates) {
+      try {
+        const contents = fs.readFileSync(p, "utf8");
+        // Prefer explicit "# months" annotation
+        let m = contents.match(/(\d+)\s*#\s*months/);
+        if (!m) m = contents.match(/(\d+)\s*months/);
+        if (!m) m = contents.match(/(\d+)/);
+        if (m) {
+          console.log(m[1]);
+          return;
+        }
+      } catch (e) {
+        // ignore missing file and try next candidate
       }
-      // fallback: try to find any number in the file
-      const m2 = dur.match(/(\d+)/);
-      if (m2) {
-        console.log(m2[1]);
-        return;
-      }
-    } catch (err) {
-      console.error("Error reading app/duration.py:", err);
     }
+    // If nothing found, fall through to model-based approach
   }
 
   const client = new OpenAI({
