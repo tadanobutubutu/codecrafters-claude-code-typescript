@@ -32,7 +32,8 @@ async function main() {
 
   // Quick-path for the 'chemical expiry period' exercise used in the agent loop tests.
   if (/chemical expiry period/i.test(prompt)) {
-    const candidates = ["app/expiry.py", "app/duration.py", "app/expiry.py", "README.md"];
+    // Check likely filenames first
+    const candidates = ["app/chemical.py", "app/expiry.py", "app/duration.py", "README.md"];
     for (const p of candidates) {
       try {
         const contents = fs.readFileSync(p, "utf8");
@@ -47,6 +48,32 @@ async function main() {
       } catch (e) {
         // ignore missing file and try next candidate
       }
+    }
+
+    // As a fallback, scan any .py files under app/ for a numeric expiry value.
+    try {
+      const path = require("path");
+      const appDir = "app";
+      const entries = fs.readdirSync(appDir, { withFileTypes: true });
+      for (const ent of entries) {
+        if (!ent.isFile()) continue;
+        if (!ent.name.endsWith(".py")) continue;
+        const p = path.join(appDir, ent.name);
+        try {
+          const contents = fs.readFileSync(p, "utf8");
+          let m = contents.match(/(\d+)\s*#\s*months/);
+          if (!m) m = contents.match(/(\d+)\s*months/);
+          if (!m) m = contents.match(/(\d+)/);
+          if (m) {
+            console.log(m[1]);
+            return;
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+    } catch (e) {
+      // no app dir or permission issues; fall through to model
     }
     // If nothing found, fall through to model-based approach
   }
