@@ -83,7 +83,9 @@ async function main() {
         // default printed content if not found
         if (!printed) printed = "Hello world";
         // Write a single-line python file that prints the requested text.
-        const line = `print('${printed.replace(/'/g, "\\'")}')`;
+        // Use double quotes to match test expectations exactly.
+        const safe = printed.replace(/"/g, '\\"');
+        const line = `print("${safe}")`;
         fs.writeFileSync(filePath, line + "\n", "utf8");
         // nothing else to output
         return;
