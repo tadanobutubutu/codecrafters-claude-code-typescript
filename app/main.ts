@@ -64,6 +64,10 @@ const tools: OpenAI.ChatCompletionTool[] = [
 
 // Execute a tool call and return the result string
 function executeTool(toolCall: OpenAI.ChatCompletionMessageToolCall): string {
+  // A tool call is either a function call or a custom-tool call, and only the function form carries a name and arguments.
+  if (toolCall.type !== "function") {
+    return `Unknown tool call type: ${toolCall.type}`;
+  }
   const name = toolCall.function.name;
   const args = JSON.parse(toolCall.function.arguments);
 
@@ -102,9 +106,9 @@ function executeTool(toolCall: OpenAI.ChatCompletionMessageToolCall): string {
 
 async function main() {
   const [, , flag, prompt] = process.argv;
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env["OPENROUTER_API_KEY"];
   const baseURL =
-    process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
+    process.env["OPENROUTER_BASE_URL"] ?? "https://openrouter.ai/api/v1";
 
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is not set");
