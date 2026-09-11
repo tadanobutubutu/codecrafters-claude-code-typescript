@@ -64,6 +64,10 @@ const tools: OpenAI.ChatCompletionTool[] = [
 
 // Execute a tool call and return the result string
 function executeTool(toolCall: OpenAI.ChatCompletionMessageToolCall): string {
+  // A tool call is either a function call or a custom-tool call, and only the function form carries a name and arguments.
+  if (toolCall.type !== "function") {
+    return `Unknown tool call type: ${toolCall.type}`;
+  }
   const name = toolCall.function.name;
   const args = JSON.parse(toolCall.function.arguments);
 
